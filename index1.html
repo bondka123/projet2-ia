@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cartes de Prix Réutilisables</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .pricing-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 32px;
+            text-align: center;
+            position: relative;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .pricing-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        .pricing-card.featured {
+            transform: scale(1.05);
+            border: 2px solid #667eea;
+        }
+
+        .featured-badge {
+            position: absolute;
+            top: 20px;
+            right: -30px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 8px 40px;
+            font-size: 12px;
+            font-weight: bold;
+            transform: rotate(45deg);
+            text-transform: uppercase;
+        }
+
+        .plan-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 16px;
+        }
+
+        .plan-price {
+            font-size: 48px;
+            font-weight: 800;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .plan-period {
+            color: #718096;
+            font-size: 16px;
+            margin-bottom: 32px;
+        }
+
+        .features-list {
+            list-style: none;
+            margin-bottom: 32px;
+        }
+
+        .features-list li {
+            padding: 12px 0;
+            border-bottom: 1px solid #e2e8f0;
+            color: #4a5568;
+            position: relative;
+            padding-left: 24px;
+        }
+
+        .features-list li:last-child {
+            border-bottom: none;
+        }
+
+        .features-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #48bb78;
+            font-weight: bold;
+        }
+
+        .cta-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .cta-button:active {
+            transform: translateY(0);
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 36px;
+            margin-bottom: 16px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 18px;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .pricing-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .pricing-card.featured {
+                transform: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Choisissez Votre Plan</h1>
+        <p class="subtitle">Des solutions flexibles pour tous vos besoins</p>
+        
+        <div class="pricing-grid" id="pricingContainer">
+            <!-- Les cartes seront générées dynamiquement -->
+        </div>
+    </div>
+
+    <script>
+        // Composant réutilisable pour créer des cartes de prix
+        class PricingCard {
+            constructor(config) {
+                this.title = config.title;
+                this.price = config.price;
+                this.period = config.period || '/mois';
+                this.features = config.features || [];
+                this.buttonText = config.buttonText || 'Commencer';
+                this.featured = config.featured || false;
+                this.buttonAction = config.buttonAction || (() => {});
+            }
+
+            render() {
+                const cardElement = document.createElement('div');
+                cardElement.className = `pricing-card ${this.featured ? 'featured' : ''}`;
+                
+                cardElement.innerHTML = `
+                    ${this.featured ? '<div class="featured-badge">Populaire</div>' : ''}
+                    <h2 class="plan-title">${this.title}</h2>
+                    <div class="plan-price">${this.price}€</div>
+                    <div class="plan-period">${this.period}</div>
+                    <ul class="features-list">
+                        ${this.features.map(feature => `<li>${feature}</li>`).join('')}
+                    </ul>
+                    <button class="cta-button" onclick="handleButtonClick('${this.title}')">${this.buttonText}</button>
+                `;
+
+                return cardElement;
+            }
+        }
+
+        // Configuration des différents plans
+        const pricingPlans = [
+            new PricingCard({
+                title: 'Starter',
+                price: '9.99',
+                period: '/mois',
+                features: [
+                    '1 GB de stockage',
+                    'Support par email',
+                    'Fonctionnalités de base',
+                    'Accès mobile'
+                ],
+                buttonText: 'Essai gratuit'
+            }),
+            new PricingCard({
+                title: 'Professionnel',
+                price: '19.99',
+                period: '/mois',
+                features: [
+                    '10 GB de stockage',
+                    'Support prioritaire',
+                    'Toutes les fonctionnalités',
+                    'API avancée',
+                    'Analytics détaillées'
+                ],
+                featured: true,
+                buttonText: 'Commencer maintenant'
+            }),
+            new PricingCard({
+                title: 'Entreprise',
+                price: '49.99',
+                period: '/mois',
+                features: [
+                    'Stockage illimité',
+                    'Support 24/7',
+                    'Intégrations custom',
+                    'Sécurité avancée',
+                    'Manager dédié',
+                    'Formation incluse'
+                ],
+                buttonText: 'Contactez-nous'
+            })
+        ];
+
+        // Fonction pour gérer les clics sur les boutons
+        function handleButtonClick(planName) {
+            alert(`Vous avez sélectionné le plan: ${planName}`);
+            // Ici vous pouvez ajouter votre logique de redirection ou d'achat
+            console.log(`Plan sélectionné: ${planName}`);
+        }
+
+        // Rendu des cartes
+        function renderPricingCards() {
+            const container = document.getElementById('pricingContainer');
+            pricingPlans.forEach(plan => {
+                container.appendChild(plan.render());
+            });
+        }
+
+        // Fonction utilitaire pour créer facilement une nouvelle carte
+        function createPricingCard(config) {
+            return new PricingCard(config);
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', renderPricingCards);
+    </script>
+</body>
+</html>
